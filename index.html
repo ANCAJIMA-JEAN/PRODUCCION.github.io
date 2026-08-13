@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Producción — Control de Avance de Labores</title>
+<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="navbar__brand" data-nav="screen-inicio">
+    <span class="navbar__logo">🌾</span>
+    <span class="navbar__title">SISTEMA PRODUCCIÓN</span>
+  </div>
+  <nav class="navbar__links">
+    <button class="navbar__link navbar__link--active" data-screen="screen-inicio" data-nav="screen-inicio">Inicio</button>
+    <button class="navbar__link" data-screen="screen-registrar-labor" data-nav="screen-registrar-labor">Registrar Labor</button>
+    <button class="navbar__link" data-screen="screen-mis-labores" data-nav="screen-mis-labores">Mis Labores</button>
+  </nav>
+</header>
+
+<main class="app">
+
+  <!-- ==================== INICIO ==================== -->
+  <section id="screen-inicio" class="screen screen--active">
+    <div class="hero">
+      <h1 class="hero__title">SISTEMA PRODUCCIÓN</h1>
+      <p class="hero__subtitle">Control de avance de labores — Deshierbo</p>
+
+      <div class="hero__actions">
+        <button id="btn-ir-registrar" class="option-card option-card--primary">
+          <span class="option-card__icon">＋</span>
+          <span class="option-card__title">REGISTRAR LABOR</span>
+          <span class="option-card__desc">Crear una nueva labor y registrar su primer avance.</span>
+        </button>
+        <button id="btn-ir-mis-labores" class="option-card option-card--secondary">
+          <span class="option-card__icon">📋</span>
+          <span class="option-card__title">MIS LABORES</span>
+          <span class="option-card__desc">Consultar labores, ver resúmenes y continuar avances.</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== REGISTRAR LABOR ==================== -->
+  <section id="screen-registrar-labor" class="screen">
+    <div class="panel">
+      <h2 class="panel__title">Registrar nueva labor</h2>
+      <p class="panel__subtitle">Complete los datos del primer avance de esta labor.</p>
+
+      <form id="form-nueva-labor" class="form" novalidate>
+        <div class="form__row">
+          <div class="form__field">
+            <label for="nl-fecha">Fecha del avance *</label>
+            <input type="date" id="nl-fecha" required>
+          </div>
+          <div class="form__field">
+            <label for="nl-sector">Sector *</label>
+            <select id="nl-sector" required></select>
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__field">
+            <label for="nl-jefe">Jefe de sector (automático)</label>
+            <input type="text" id="nl-jefe" readonly tabindex="-1" placeholder="Se completa al elegir el sector">
+          </div>
+          <div class="form__field">
+            <label for="nl-meta">Meta de rendimiento del sector</label>
+            <input type="text" id="nl-meta" readonly tabindex="-1" placeholder="Se completa al elegir el sector">
+          </div>
+        </div>
+
+        <div class="form__field">
+          <label for="nl-labor">Labor *</label>
+          <select id="nl-labor" required></select>
+        </div>
+
+        <div class="form__row">
+          <div class="form__field">
+            <label for="nl-jornales">Jornales *</label>
+            <input type="number" id="nl-jornales" min="0.01" step="0.01" required placeholder="0">
+          </div>
+          <div class="form__field">
+            <label for="nl-hectareas">Hectáreas ejecutadas *</label>
+            <input type="number" id="nl-hectareas" min="0.01" step="0.01" required placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__field">
+            <label for="nl-jrha">Jr/Ha (automático)</label>
+            <input type="text" id="nl-jrha" readonly tabindex="-1">
+          </div>
+          <div class="form__field">
+            <label for="nl-hajr">Ha/Jr (automático)</label>
+            <input type="text" id="nl-hajr" readonly tabindex="-1">
+          </div>
+        </div>
+
+        <div class="form__field">
+          <label for="nl-observacion">Observación <span class="opcional">(opcional)</span></label>
+          <textarea id="nl-observacion" rows="2" placeholder="Notas adicionales del avance..."></textarea>
+        </div>
+
+        <div class="form__field">
+          <label for="nl-mapa">Mapa de avance (JPG, JPEG, PNG o WEBP) *</label>
+          <input type="file" id="nl-mapa" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+          <div id="nl-preview" class="preview"></div>
+        </div>
+
+        <div class="form__actions">
+          <button type="button" id="nl-cancelar" class="btn btn--ghost">Cancelar</button>
+          <button type="submit" id="nl-guardar" class="btn btn--primary">Guardar labor</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== MIS LABORES ==================== -->
+  <section id="screen-mis-labores" class="screen">
+    <div class="panel panel--wide">
+      <h2 class="panel__title">Mis labores</h2>
+
+      <div class="filtros">
+        <input type="search" id="buscar-labor" placeholder="Buscar labor, sector, jefe..." class="filtros__buscar">
+        <select id="filtro-labor"><option value="">Todas las labores</option></select>
+        <select id="filtro-jefe"><option value="">Todos los jefes</option></select>
+        <select id="filtro-sector"><option value="">Todos los sectores</option></select>
+        <button id="btn-limpiar-filtros" class="btn btn--ghost btn--sm">Limpiar</button>
+      </div>
+
+      <div id="lista-labores" class="grid-labores"></div>
+      <p id="mis-labores-vacio" class="empty-state hidden">No se encontraron labores con los filtros seleccionados.</p>
+    </div>
+  </section>
+
+  <!-- ==================== CONTINUAR AVANCE ==================== -->
+  <section id="screen-continuar-avance" class="screen">
+    <div class="panel">
+      <h2 class="panel__title">Continuar avance</h2>
+
+      <div class="labor-readonly">
+        <h3>LABOR SELECCIONADA <span class="labor-readonly__id" id="ca-id-labor"></span></h3>
+        <dl>
+          <dt>Labor</dt><dd id="ca-labor-nombre"></dd>
+          <dt>Sector</dt><dd id="ca-sector"></dd>
+          <dt>Jefe</dt><dd id="ca-jefe"></dd>
+        </dl>
+      </div>
+
+      <form id="form-continuar-avance" class="form" novalidate>
+        <div class="form__row">
+          <div class="form__field">
+            <label for="ca-fecha">Fecha del nuevo avance *</label>
+            <input type="date" id="ca-fecha" required>
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__field">
+            <label for="ca-jornales">Jornales *</label>
+            <input type="number" id="ca-jornales" min="0.01" step="0.01" required placeholder="0">
+          </div>
+          <div class="form__field">
+            <label for="ca-hectareas">Hectáreas ejecutadas *</label>
+            <input type="number" id="ca-hectareas" min="0.01" step="0.01" required placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__field">
+            <label for="ca-jrha">Jr/Ha (automático)</label>
+            <input type="text" id="ca-jrha" readonly tabindex="-1">
+          </div>
+          <div class="form__field">
+            <label for="ca-hajr">Ha/Jr (automático)</label>
+            <input type="text" id="ca-hajr" readonly tabindex="-1">
+          </div>
+        </div>
+
+        <div class="form__field">
+          <label for="ca-observacion">Observación <span class="opcional">(opcional)</span></label>
+          <textarea id="ca-observacion" rows="2" placeholder="Notas adicionales del avance..."></textarea>
+        </div>
+
+        <div class="form__field">
+          <label for="ca-mapa">Nuevo mapa de avance *</label>
+          <input type="file" id="ca-mapa" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+          <div id="ca-preview" class="preview"></div>
+        </div>
+
+        <div class="form__actions">
+          <button type="button" id="ca-cancelar" class="btn btn--ghost">Cancelar</button>
+          <button type="submit" id="ca-guardar" class="btn btn--primary">Guardar avance</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== VER RESUMEN ==================== -->
+  <section id="screen-resumen" class="screen">
+    <div class="panel panel--wide" id="resumen-capturable">
+      <div class="resumen-header">
+        <div>
+          <h2 class="panel__title">Resumen de labor <span class="labor-readonly__id" id="rs-id-labor"></span></h2>
+          <dl class="resumen-header__dl">
+            <dt>Labor</dt><dd id="rs-labor"></dd>
+            <dt>Sector</dt><dd id="rs-sector"></dd>
+            <dt>Jefe</dt><dd id="rs-jefe"></dd>
+            <dt>Fecha de inicio</dt><dd id="rs-fecha-inicio"></dd>
+            <dt>Estado</dt><dd id="rs-estado"></dd>
+          </dl>
+        </div>
+        <div class="resumen-header__actions">
+          <button id="btn-volver-resumen" class="btn btn--ghost">← Volver</button>
+          <button id="btn-capturar-resumen" class="btn btn--secondary">📸 Preparar captura</button>
+        </div>
+      </div>
+
+      <h3 class="section-title">Vista rápida</h3>
+      <div class="vista-rapida">
+        <figure class="mapa-card mapa-card--grande">
+          <img id="rs-ultimo-mapa-img" src="" alt="Último mapa subido" class="mapa-card__img">
+          <figcaption>
+            <span id="rs-ultimo-mapa-fecha">Último mapa subido</span>
+            <button class="btn btn--ghost btn--sm" id="btn-ampliar-ultimo">Ampliar</button>
+          </figcaption>
+        </figure>
+        <div class="consolidado consolidado--compacto">
+          <div class="consolidado__item"><span id="rs-cons-jornales-vr">0</span><label>Jornales totales</label></div>
+          <div class="consolidado__item"><span id="rs-cons-hectareas-vr">0</span><label>Hectáreas totales</label></div>
+          <div class="consolidado__item"><span id="rs-cons-jrha-vr">0</span><label>Jr/Ha consolidado</label></div>
+          <div class="consolidado__item"><span id="rs-cons-hajr-vr">0</span><label>Ha/Jr consolidado</label></div>
+          <div class="consolidado__item"><span id="rs-cons-avances-vr">0</span><label>Avances registrados</label></div>
+          <div class="consolidado-semaforo consolidado-semaforo--compacto">
+            <span id="rs-cons-semaforo-vr"></span>
+            <small id="rs-cons-meta-vr"></small>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title">Detalle de avances</h3>
+      <div class="table-wrap">
+        <table class="tabla-avances">
+          <thead>
+            <tr><th>N°</th><th>Fecha</th><th>Jornales</th><th>Hectáreas</th><th>Jr/Ha</th><th>Ha/Jr</th><th>Rendimiento</th><th>Observación</th><th>Mapa</th></tr>
+          </thead>
+          <tbody id="rs-tabla-avances"></tbody>
+        </table>
+      </div>
+
+      <h3 class="section-title">Mapas de ejecución</h3>
+      <div id="rs-mapas" class="grid-mapas"></div>
+
+      <h3 class="section-title">Consolidado de la labor</h3>
+      <div class="consolidado">
+        <div class="consolidado__item"><span id="rs-cons-jornales">0</span><label>Jornales totales</label></div>
+        <div class="consolidado__item"><span id="rs-cons-hectareas">0</span><label>Hectáreas totales</label></div>
+        <div class="consolidado__item"><span id="rs-cons-jrha">0</span><label>Jr/Ha consolidado</label></div>
+        <div class="consolidado__item"><span id="rs-cons-hajr">0</span><label>Ha/Jr consolidado</label></div>
+        <div class="consolidado__item"><span id="rs-cons-avances">0</span><label>Avances registrados</label></div>
+      </div>
+      <div class="consolidado-semaforo">
+        <span id="rs-cons-semaforo"></span>
+        <small id="rs-cons-meta"></small>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="lightbox" class="lightbox"><img src="" alt="Mapa ampliado"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/labor.js"></script>
+<script src="js/avances.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
