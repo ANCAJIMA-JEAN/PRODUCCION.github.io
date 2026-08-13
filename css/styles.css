@@ -473,3 +473,42 @@ input, select, textarea { font-family: inherit; }
   flex-wrap: wrap;
 }
 .consolidado-semaforo small { color: var(--gris-texto); font-size: 0.78rem; }
+
+/* ---------------- PRODUCCIÓN: SECTOR TAG, VISTA RÁPIDA ---------------- */
+
+.card-labor__sector-tag {
+  align-self: flex-start;
+  background: var(--azul-oscuro);
+  color: var(--blanco);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.vista-rapida {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+@media (min-width: 760px) {
+  .vista-rapida { grid-template-columns: 1.1fr 1.4fr; align-items: stretch; }
+}
+
+.mapa-card--grande .mapa-card__img { height: 220px; }
+
+.consolidado--compacto {
+  grid-template-columns: repeat(2, 1fr);
+  padding: 1rem;
+  margin-top: 0;
+}
+@media (min-width: 480px) { .consolidado--compacto { grid-template-columns: repeat(3, 1fr); } }
+.consolidado--compacto .consolidado__item span { font-size: 1.1rem; }
+
+.consolidado-semaforo--compacto {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
